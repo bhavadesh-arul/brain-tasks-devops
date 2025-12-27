@@ -1,9 +1,10 @@
 version: 0.0
 Resources:
-  - TargetService:
-      Type: Kubernetes
+  - Kubernetes:
+      Type: AWS::EKS::Deployment
       Properties:
-        TaskDefinition: k8s/deployment.yaml
-        LoadBalancerInfo:
-          ContainerName: brain-tasks-app
-          ContainerPort: 80
+        ClusterName: brain-tasks-cluster
+        Namespace: default
+        ManifestFiles:
+          - k8s/deployment.yaml
+          - k8s/service.yaml
