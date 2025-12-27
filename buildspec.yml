@@ -4,6 +4,7 @@ env:
   variables:
     AWS_DEFAULT_REGION: ap-south-1
     ECR_REPO: 018642687171.dkr.ecr.ap-south-1.amazonaws.com/brain-tasks-app
+    EKS_CLUSTER_NAME: brain-tasks-cluster
 
 phases:
   pre_build:
@@ -11,6 +12,8 @@ phases:
       - echo Logging in to Amazon ECR...
       - aws ecr get-login-password --region $AWS_DEFAULT_REGION |
         docker login --username AWS --password-stdin $ECR_REPO
+      - echo Updating kubeconfig...
+      - aws eks update-kubeconfig --region $AWS_DEFAULT_REGION --name $EKS_CLUSTER_NAME
 
   build:
     commands:
@@ -22,4 +25,7 @@ phases:
     commands:
       - echo Pushing image to ECR...
       - docker push $ECR_REPO:latest
-      - echo Build completed on `date`
+      - echo Deploying to EKS...
+      - kubectl apply -f k8s/deployment.yaml
+      - kubectl apply -f k8s/service.yaml
+      - echo Deployment completed on `date`
